@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	   http://www.springframework.org/schema/context  http://www.springframework.org/schema/context/spring-context-3.0.xsd  
+	   http://www.springframework.org/schema/task     http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+
+	<!-- 调度工厂类 -->
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref bean="asynUpdateUserTrigger" />
+				<!-- <ref bean="asynSendSmsTrigger" /> -->
+			</list>
+		</property>
+	</bean>
+
+	<!--触发器 -->
+	<bean id="asynUpdateUserTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<ref bean="asynUpdateUserJobDetail" />
+		</property>
+		<property name="cronExpression">
+			<value>0 0/2 * * * ?</value>
+		</property>
+	</bean>
+	
+	<bean id="asynUpdateUserJobDetail"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref bean="asynUserJobTarget" />
+		</property>
+		<property name="targetMethod">
+			<value>updateUserTarget</value>
+		</property>
+		<property name="concurrent">
+		    <value>false</value>
+		</property>
+	</bean>
+	<bean id="asynUserJobTarget" class="com.easou.usercenter.job.AsynUserJobTarget">
+		<property name="asynUserManager">
+			<ref bean="asynUserManager" />
+		</property>
+	</bean>
+	
+	<!--触发器 
+	<bean id="asynSendSmsTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<ref bean="asynSendSmsJobDetail" />
+		</property>
+		<property name="cronExpression">
+			<value>0/1 * * * * ?</value>
+		</property>
+	</bean>
+	
+	<bean id="asynSendSmsJobDetail"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref bean="asynSendSmsobTarget" />
+		</property>
+		<property name="targetMethod">
+			<value>sendSms</value>
+		</property>
+		<property name="concurrent">
+		    <value>false</value>
+		</property>
+	</bean>
+	<bean id="asynSendSmsobTarget" class="com.easou.usercenter.job.AsynSendSmsJobTarget">
+		<property name="asynSendSmsManager">
+			<ref bean="asynSendSmsManager" />
+		</property>
+	</bean>
+	-->
+</beans>

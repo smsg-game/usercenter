@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="EucUserDao">
+	<sql id="columns"> u.id id,u.name name,u.nick_name nickName,u.mobile mobile,u.sex sex,u.city city,u.birthday birthday,u.occu_id occuId,u.status status,
+		u.passwd1 passwd,u.register_time registerTime,u.bind_time bindTime,u.last_login_time lastLoginTime,u.question question,u.status,u.answer answer,u.email email, u.qn qn
+	</sql>
+
+	<insert id="insertUser" parameterType="EucUser">
+		<selectKey resultType="java.lang.Long" order="BEFORE" keyProperty="id">
+			SELECT seq_euc_user.nextval AS ID FROM DUAL
+		</selectKey>
+		<![CDATA[insert into euc_user(
+		id,
+		name,
+		random_passwd,
+		nick_name,
+		mobile,
+		status,
+		sex,
+		register_time,
+		passwd1,
+		email,
+		qn
+		) values(
+		#{id,jdbcType=INTEGER},
+		#{name,jdbcType=VARCHAR},
+		#{randomPasswd,jdbcType=VARCHAR},
+		#{nickName,jdbcType=VARCHAR},
+		#{mobile,jdbcType=VARCHAR},
+		#{status,jdbcType=INTEGER},
+		#{sex,jdbcType=INTEGER},
+		sysdate,
+		#{passwd,jdbcType=VARCHAR},
+		#{email,jdbcType=VARCHAR},
+		#{qn,jdbcType=VARCHAR})]]>
+	</insert>
+
+	<select id="queryUserById" parameterType="string" resultType="EucUser">
+		select
+		<include refid="columns" />
+		from euc_user u
+		where u.id=#{value}
+	</select>
+
+	<sql id="update_columns">
+		<if test="name!=null">name=#{name,jdbcType=VARCHAR},</if>
+		<if test="passwd!=null">passwd1=#{passwd,jdbcType=VARCHAR},</if>
+		<if test="nickName!=null">nick_name=#{nickName,jdbcType=VARCHAR},</if>
+		<if test="mobile!=null">mobile=#{mobile,jdbcType=VARCHAR},</if>
+		<if test="status!=null">status=#{status,jdbcType=INTEGER},</if>
+		<if test="question!=null">question=#{question,jdbcType=VARCHAR},</if>
+		<if test="answer!=null">answer=#{answer,jdbcType=VARCHAR},</if>
+		<if test="birthday!=null">birthday=#{birthday,jdbcType=INTEGER},</if>
+		<if test="city!=null">city=#{city,jdbcType=VARCHAR},</if>
+		<if test="occuId!=null">occu_id=#{occuId,jdbcType=INTEGER},</if>
+		<if test="sex!=null">sex=#{sex,jdbcType=INTEGER},</if>
+		<if test="email!=null">email=#{email,jdbcType=VARCHAR}</if>
+    <!-- QN shouldn't be updated. -->
+	</sql>
+
+	<update id="upadteUserByid" parameterType="map">
+		update euc_user
+		<set>
+			<include refid="update_columns" />
+		</set>
+		where id=#{id}
+	</update>
+
+	<select id="queryUserInfoByName" parameterType="string" resultType="EucUser">
+		select
+		<include refid="columns" />
+		from euc_user u
+		<![CDATA[where lower(u.name)=#{value} and rownum<2]]>
+	</select>
+
+	<select id="queryUserInfoByNickName" parameterType="string" resultType="EucUser">
+		select
+		<include refid="columns" />
+		from euc_user u
+		<![CDATA[where u.nick_name=#{value} and rownum<2]]>
+	</select>
+
+	<select id="queryUserInfoByMobile" parameterType="string" resultType="EucUser">
+		select
+		<include refid="columns" />
+		from euc_user u
+		<![CDATA[where u.mobile=#{value} and rownum<2]]>
+	</select>
+
+	<select id="getOccupation" resultType="java.util.HashMap">
+		select id,name from euc_occupation
+	</select>
+
+	<select id="queryUserInfoByNameAndPwd" parameterType="map" resultType="EucUser">
+		select
+		<include refid="columns" />
+		from euc_user u
+		<![CDATA[where lower(u.name)=#{name}  and u.passwd1=#{pwd} and rownum<2]]>
+	</select>
+
+	<select id="queryUserInfoByNMIandPwd" parameterType="map" resultType="EucUser">
+		select
+		<include refid="columns" />
+		from euc_user u
+		<![CDATA[ where (lower(u.name)=#{va} or u.mobile=#{va}) and u.passwd1=#{pwd} and rownum<2]]>
+	</select>
+
+	<select id="queryUserInfoByEmail" parameterType="string" resultType="EucUser">
+		select
+		<include refid="columns" />
+		from euc_user u
+		<![CDATA[where u.email=#{value} and rownum<2]]>
+	</select>
+
+	<update id="batchUpdateUser" parameterType="java.util.List">
+		update EUC_USER
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix="last_login_time=case" suffix="end,">
+				<foreach collection="list" item="user" index="index">
+					<if test="user!=null">
+						when id=#{user.id} then #{user.lastLoginTime,jdbcType=TIMESTAMP}
+					</if>
+				</foreach>
+			</trim>
+		</trim>
+		where
+		<foreach collection="list" separator="or" item="user" index="index">
+			<if test="user!=null">
+				id =#{user.id}
+			</if>
+		</foreach>
+	</update>
+
+	<sql id="update_null_columns">
+		<if test="mobile!=null">mobile=null,</if>
+		<if test="birthday!=null">birthday=null,</if>
+		<if test="city!=null">city=null,</if>
+		<if test="occuId!=null">occu_id=null,</if>
+		<if test="email!=null">email=null</if>
+	</sql>
+
+	<update id="upadteNullByid" parameterType="map">
+		update euc_user
+		<set>
+			<include refid="update_null_columns" />
+		</set>
+		where id=#{id}
+	</update>
+</mapper>

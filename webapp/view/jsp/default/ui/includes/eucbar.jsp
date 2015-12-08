@@ -1,0 +1,2 @@
+<%@ page contentType="text/html; charset=UTF-8" %>
+<div class="header"><a href="<c:url value="${read}${requestScope.contextPath}/login${qryString}" />">登录</a>|<a href="<c:url value="${write}${requestScope.contextPath}/mregist${qryString}" />">注册</a>|<a href="<c:url value="${write}${requestScope.contextPath}/pass/sforget${qryString}" />">忘记密码</a></div>

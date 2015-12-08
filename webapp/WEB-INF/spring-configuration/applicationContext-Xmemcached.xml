@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd"
+	default-lazy-init="false">
+	
+	<!-- ************************ ticket config ************************* -->
+	<bean id="addrListTicket" class="net.rubyeye.xmemcached.utils.AddrUtil" factory-method="getAddressMap">  
+		<constructor-arg value="${ticket.memcached.hosts}" />  
+    </bean>
+    
+	<!-- xmemcached -->
+	<bean id="memcachedClientBuilderTicket" class="net.rubyeye.xmemcached.XMemcachedClientBuilder">
+		<!-- XMemcachedClientBuilder have two arguments.First is server list,and 
+			second is weights array. -->
+		<constructor-arg>
+			<ref bean="addrListTicket"/>
+		</constructor-arg>
+		<!-- 
+		<constructor-arg>
+			<ref bean="weights"/>
+		</constructor-arg>
+		 -->
+		 
+		<property name="commandFactory">
+			<bean class="net.rubyeye.xmemcached.command.TextCommandFactory"></bean>
+		</property>
+		<property name="sessionLocator">
+			<bean class="net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator"></bean>
+		</property>
+		<property name="transcoder">
+			<bean class="net.rubyeye.xmemcached.transcoders.SerializingTranscoder" />
+		</property>
+		
+		<!-- 一般情况我们使用一致性哈希做环形结构，不做备份节点! -->
+		<property name="failureMode" value="${ticket.memcached.failureMode}" />
+		<!-- 连接池 -->
+		<property name="connectionPoolSize" value="${ticket.memcached.connectionPoolSize}" />
+	</bean>
+
+	<!-- Use factory bean to build memcached client -->
+	<bean id="memcachedClientTicket" factory-bean="memcachedClientBuilderTicket" 
+			factory-method="build" destroy-method="shutdown">
+		<property name="enableHeartBeat" value="${ticket.memcached.enableHeartBeat}"/>
+		<property name="opTimeout" value="${ticket.memcached.opTimeout}"/>
+	</bean>
+	
+	
+	
+	
+	
+	<!-- ************************ session config ************************* -->
+	<bean id="addrListSess" class="net.rubyeye.xmemcached.utils.AddrUtil" factory-method="getAddressMap">  
+		<constructor-arg value="${sess.memcached.hosts}" />  
+    </bean>
+    
+	<!-- xmemcached -->
+	<bean id="memcachedClientBuilderSess" class="net.rubyeye.xmemcached.XMemcachedClientBuilder">
+		<!-- XMemcachedClientBuilder have two arguments.First is server list,and 
+			second is weights array. -->
+		<constructor-arg>
+			<ref bean="addrListSess"/>
+		</constructor-arg>
+		<!-- 
+		<constructor-arg>
+			<ref bean="weights"/>
+		</constructor-arg>
+		 -->
+		 
+		<property name="commandFactory">
+			<bean class="net.rubyeye.xmemcached.command.TextCommandFactory"></bean>
+		</property>
+		<property name="sessionLocator">
+			<bean class="net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator"></bean>
+		</property>
+		<property name="transcoder">
+			<bean class="net.rubyeye.xmemcached.transcoders.SerializingTranscoder" />
+		</property>
+		
+		<!-- 一般情况我们使用一致性哈希做环形结构，不做备份节点! -->
+		<property name="failureMode" value="${sess.memcached.failureMode}" />
+		<!-- 连接池 -->
+		<property name="connectionPoolSize" value="${sess.memcached.connectionPoolSize}" />
+	</bean>
+
+	<!-- Use factory bean to build memcached client -->
+	<bean id="memcachedClientSess" factory-bean="memcachedClientBuilderSess" 
+			factory-method="build" destroy-method="shutdown">
+		<property name="enableHeartBeat" value="${sess.memcached.enableHeartBeat}"/>
+		<property name="opTimeout" value="${sess.memcached.opTimeout}"/>
+	</bean>
+    
+    <bean id="httpsessService" class="org.jasig.cas.http.CacheService" factory-method="getInstance">
+		<property name="client" ref="memcachedClientSess"/>
+	</bean>
+	
+</beans>

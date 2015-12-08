@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flow xmlns="http://www.springframework.org/schema/webflow"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.springframework.org/schema/webflow
+                          http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd">
+
+    <var name="credentials" class="com.easou.cas.authenticateion.AccessTokenCredentials" />
+    <on-start>
+        <evaluate expression="initialFlowSetupAction" />
+    </on-start>
+    
+    <!-- 判定是否强制重新登录 -->
+    <!--decision-state id="renewRequestCheck">
+		<if test="externalContext.requestParameterMap['renew'] neq '' &amp;&amp; externalContext.requestParameterMap['renew'] neq null" then="createTgt" else="ticketGrantingTicketExistsCheck" />
+	</decision-state-->
+    
+	<!-- 判定tgt是否存在 -->
+	<!--decision-state id="ticketGrantingTicketExistsCheck">
+		<if test="flowScope.ticketGrantingTicketId neq null" then="hasServiceCheck" else="createTgt" />
+	</decision-state-->
+		
+	<!--tgt创建,每次用第三方登录都强制重新生成tgt-->
+	<action-state id="createTgt">
+		<evaluate expression="extCreateTgtAction.createTgt(flowRequestContext,flowScope.credentials,messageContext)" />
+		<transition on="success" to="sendTicketGrantingTicket" />
+	</action-state>
+	
+	<!-- 将tgt信息添加到cookie -->
+	<action-state id="sendTicketGrantingTicket">
+        <evaluate expression="sendTicketGrantingTicketAction" />
+		<transition to="hasServiceCheck" />
+	</action-state>
+
+	<!-- 是否有service地址 -->
+	<decision-state id="hasServiceCheck">
+		<if test="flowScope.service neq null" then="generateServiceTicket" else="viewGenericLoginSuccess" />
+	</decision-state>
+	
+	<action-state id="generateServiceTicket">
+        <evaluate expression="generateServiceTicketAction" />
+		<transition on="success" to ="warn" />
+		<transition on="error" to="redirect" />
+		<transition on="gateway" to="gatewayServicesManagementCheck" />
+	</action-state>
+	
+	<decision-state id="warn">
+		<if test="flowScope.warnCookieValue" then="showWarningView" else="redirect" />
+	</decision-state>
+
+    <action-state id="gatewayServicesManagementCheck">
+        <evaluate expression="gatewayServicesManagementCheck" />
+        <transition on="success" to="redirect" />
+    </action-state>
+	
+    <action-state id="redirect">
+        <evaluate expression="flowScope.service.getResponse(requestScope.serviceTicketId)" result-type="org.jasig.cas.authentication.principal.Response" result="requestScope.response" />
+        <transition to="postRedirectDecision" />
+    </action-state>
+    
+    <!-- 取得正常返回，及返回页面 >
+	<action-state id="getReturnResponse">
+        <evaluate 
+        expression="generateResponse.getResponse(flowRequestContext)" 
+        result-type="org.jasig.cas.authentication.principal.Response" 
+        result="requestScope.response" />
+        <transition to="redirectView" />
+    </action-state-->
+
+    <decision-state id="postRedirectDecision">
+        <if test="requestScope.response.responseType.name() eq 'POST'" then="postView" else="redirectView" />
+    </decision-state>
+
+	<!-- 
+		the "viewGenericLogin" is the end state for when a user attempts to login without coming directly from a service.
+		They have only initialized their single-sign on session.
+	-->
+	<end-state id="viewGenericLoginSuccess" view="casLoginGenericSuccessView" />
+
+	<!-- 
+		The "showWarningView" end state is the end state for when the user has requested privacy settings (to be "warned") to be turned on.  It delegates to a 
+		view defines in default_views.properties that display the "Please click here to go to the service." message.
+	-->
+	<end-state id="showWarningView" view="casLoginConfirmView" />
+
+    <end-state id="postView" view="postResponseView">
+        <on-entry>
+            <set name="requestScope.parameters" value="requestScope.response.attributes" />
+            <set name="requestScope.originalUrl" value="flowScope.service.id" />
+        </on-entry>
+    </end-state>
+
+	<!-- 
+		The "redirect" end state allows CAS to properly end the workflow while still redirecting
+		the user back to the service required.
+	-->
+	<end-state id="redirectView" view="externalRedirect:${requestScope.response.url}" />
+	<end-state id="loginRedirectView" view="externalRedirect:login" />
+	
+	<end-state id="viewServiceErrorView" view="viewServiceErrorView" />
+    
+    <end-state id="viewServiceSsoErrorView" view="viewServiceSsoErrorView" />
+
+	<global-transitions>
+		<transition to="viewServiceErrorView" on-exception="org.springframework.webflow.execution.repository.NoSuchFlowExecutionException" />
+        <transition to="viewServiceSsoErrorView" on-exception="org.jasig.cas.services.UnauthorizedSsoServiceException" />
+		<transition to="viewServiceErrorView" on-exception="org.jasig.cas.services.UnauthorizedServiceException" />
+	</global-transitions>
+</flow>

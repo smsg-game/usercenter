@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="sso">
+        <wb-resource deploy-path="/" source-path="/webapp"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/cas-client-core"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/cas-server-core"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/user-center-core"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/test/etc"/>
+        <property name="java-output-path" value="/sso/webapp/WEB-INF/classes"/>
+        <property name="context-root" value="/"/>
+    </wb-module>
+</project-modules>

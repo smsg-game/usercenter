@@ -1,0 +1,57 @@
+@charset "utf-8";
+/* CSS Document */
+body, form, input, p {
+	padding:0;
+	margin:0;
+}
+body {
+	font-family:微软雅黑;
+	font-size:medium;
+	text-align:left;
+	line-height:1.5em;
+}
+a {
+	color:#003CA9;
+	text-decoration:none;
+}
+a:hover {
+	color:#003CA9;
+	text-decoration:none;
+}
+img{border:none;}
+.header{
+        height:33px;
+        line-height:33px;
+        border-bottom:1px solid #DFDFDF;
+        background:#F0EFEF;
+}
+.header a{
+	 padding:0 5px;
+}
+.content{margin:5px 0 0 5px;}
+.content p{
+	padding:2px 0;
+}
+.con2{
+	padding:5px 0 5px 5px;
+	margin-top:10px;
+   border-bottom:1px solid #DFDFDF;
+	border-top:1px solid #DFDFDF;
+	background:#F0EFEF;
+	}
+.input_box{
+        font-size:medium;
+        height:33px;
+        width:250px;
+}
+.button_1{
+        font-size:medium;
+        height:33px;
+}
+.footer{margin:5px 0 0 5px;}
+
+.errors {border:1px dotted #d21033; background:#fed; color:#d21033;}
+
+.success {border:1px dotted #390; background:#dfa; color:#390;}
+
+.info {border:1px dotted 008;    background:#eff; color:#008;}

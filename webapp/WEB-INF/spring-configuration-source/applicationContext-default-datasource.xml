@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+      http://www.springframework.org/schema/context
+      http://www.springframework.org/schema/context/spring-context.xsd
+      http://www.springframework.org/schema/mvc
+      http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+	  http://www.springframework.org/schema/tx
+      http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+      http://www.springframework.org/schema/aop
+	  http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+	  
+	 <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName">
+			<value>java:comp/env/jdbc/cas</value>
+		</property>
+	</bean> 
+<!--  test
+	<bean id="dataSource"
+	  class="com.mchange.v2.c3p0.ComboPooledDataSource">
+	   <property name="driverClass"><value>oracle.jdbc.driver.OracleDriver</value></property>
+	         <property name="jdbcUrl"><value>jdbc:oracle:thin:@192.168.1.8:1521:ftgame</value></property>               
+	         <property name="user"><value>dbuser</value></property>
+	         <property name="password"><value>c6c6e11cb5ea6c6e6c6c6e67e11</value></property> 
+	         <property name="minPoolSize"><value>1</value></property>
+	         <property name="maxPoolSize"><value>50</value></property>
+	         <property name="maxIdleTime"><value>1800</value></property>
+	         <property name="acquireIncrement"><value>2</value></property>
+	         <property name="maxStatements"><value>0</value></property>
+	         <property name="initialPoolSize"><value>5</value></property>
+	         <property name="idleConnectionTestPeriod"><value>1800</value></property>
+	         <property name="acquireRetryAttempts"><value>30</value></property>
+	         <property name="breakAfterAcquireFailure"><value>true</value></property>
+	         <property name="testConnectionOnCheckout"><value>false</value></property>
+	 </bean>-->
+	<!-- define the SqlSessionFactory -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="typeAliasesPackage" value="com.easou.usercenter.entity" />
+		<property name="configLocation" value="classpath:sqlMapConfig.xml" />
+	</bean>
+
+
+	<!-- scan for mappers and let them be autowired -->
+	<!--
+		bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.easou.usercenter.dao" />
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" /> </bean
+	-->
+	<!--
+		<bean id="sqlSessionTemplate"
+		class="org.mybatis.spring.SqlSessionTemplate"> <constructor-arg
+		index="0" ref="sqlSessionFactory" /> </bean>
+		<context:component-scan base-package="com.easou.usercenter.service,
+		com.easou.usercenter.dao" />
+	-->
+	
+</beans>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd"
+	default-lazy-init="false">
+
+	<import resource="propertyFileConfigurer.xml" />
+	<bean id="defaultPool" class="com.danga.MemCached.SockIOPool"
+		factory-method="getInstance" init-method="initialize" destroy-method="shutDown">
+		<constructor-arg>
+			<value>default</value>
+		</constructor-arg>
+		<property name="servers">
+			<value>${ticket.cache.servers}</value>
+		</property>
+		<property name="initConn">
+			<value>${ticket.cache.initConn}</value>
+		</property>
+		<property name="minConn">
+			<value>${ticket.cache.minConn}</value>
+		</property>
+		<property name="maxConn">
+			<value>${ticket.cache.maxConn}</value>
+		</property>
+		<property name="maintSleep">
+			<value>${ticket.cache.maintSleep}</value>
+		</property>
+		<property name="nagle">
+			<value>${ticket.cache.nagle}</value>
+		</property>
+		<property name="socketTO">
+			<value>${ticket.cache.socketTO}</value>
+		</property>
+		<property name="aliveCheck">
+			<value>${ticket.cache.aliveCheck}</value>
+		</property>
+	</bean>
+	<!-- 验证票放置内存 -->
+	<bean id="ticketClient" class="com.danga.MemCached.MemCachedClient">
+		<constructor-arg>
+			<value>default</value>
+		</constructor-arg>
+		<property name="compressEnable">
+			<value>false</value>
+		</property>
+		<property name="compressThreshold">
+			<value>4096</value>
+		</property>
+		<property name="sanitizeKeys">
+			<value>false</value>
+		</property>
+	</bean>
+	
+	<!-- http session 缓存池 -->	
+	<bean id="httpPool" class="com.danga.MemCached.SockIOPool"
+		factory-method="getInstance" init-method="initialize" destroy-method="shutDown">
+		<constructor-arg>
+			<value>httpsess</value>
+		</constructor-arg>
+		<property name="servers">
+			<value>${sess.cache.servers}</value>
+		</property>
+		<property name="initConn">
+			<value>${sess.cache.initConn}</value>
+		</property>
+		<property name="minConn">
+			<value>${sess.cache.minConn}</value>
+		</property>
+		<property name="maxConn">
+			<value>${sess.cache.maxConn}</value>
+		</property>
+		<property name="maintSleep">
+			<value>${sess.cache.maintSleep}</value>
+		</property>
+		<property name="nagle">
+			<value>${sess.cache.nagle}</value>
+		</property>
+		<property name="socketTO">
+			<value>${sess.cache.socketTO}</value>
+		</property>
+		<property name="aliveCheck">
+			<value>${sess.cache.aliveCheck}</value>
+		</property>
+	</bean>
+	
+	<!-- session信息放置缓存 -->
+	<bean id="httpsessClient" class="com.danga.MemCached.MemCachedClient">
+		<constructor-arg>
+			<value>httpsess</value>
+		</constructor-arg>
+		<property name="compressEnable">
+			<value>false</value>
+		</property>
+		<property name="compressThreshold">
+			<value>4096</value>
+		</property>
+		<property name="sanitizeKeys">
+			<value>false</value>
+		</property>
+	</bean>
+	
+	<!-- 
+	<bean id="httpsessService" class="org.jasig.cas.http.CacheService" factory-method="getInstance">
+		<property name="client" ref="httpsessClient"/>
+	</bean>
+	 -->
+</beans>

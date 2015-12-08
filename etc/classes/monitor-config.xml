@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<clus>
+	<service  type="2">
+		<addr>master@127.0.0.1:6385;master@127.0.0.1:6386;127.0.0.1:6387</addr>
+		<maxActive>4</maxActive>
+		<maxIdle>4</maxIdle>
+		<minIdle>1</minIdle>
+		<maxWait>10000</maxWait>
+	</service>
+</clus>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<clus>
+	<service  type="1">
+		<addr>127.0.0.1:6385</addr>
+		<maxActive>2048</maxActive>
+        <maxIdle>100</maxIdle>
+        <minIdle>20</minIdle>
+        <maxWait>3000</maxWait>
+		<passwd><![CDATA[HG%^&*DF]]></passwd>
+	</service>
+</clus>

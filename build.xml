@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="compile_all" name="usrcenter">
+	<!--Load properties file-->
+	<property file="build.properties" />
+
+	<!-- App name-dependent settings. -->
+	<property name="appname" value="${ant.project.name}" />
+	<property name="distname" value="framework3" />
+	<property name="ear" value="${appname}.ear" />
+	<property name="war" value="${appname}.war" />
+
+	<!-- change this property to use a compiler other than javac. -->
+	<property name="build.compiler" value="modern" />
+
+	<!-- App directory structure. -->
+	<property name="project.dir" value=".." />
+	<property name="src" value="${basedir}" />
+	<property name="src.ucenter" value="${src}/user-center-core" />
+	<property name="src.casservice" value="${src}/cas-server-core" />
+	<property name="src.casclient" value="${src}/cas-client-core" />
+	<property name="src.common" value="${src.ucenter}/com/easou/common" />
+	<property name="src.common.api" value="${src.common}/api" />
+	<property name="src.common.constant" value="${src.common}/constant" />
+	<property name="src.cas.auth" value="${src.ucenter}/com/easou/cas/auth" />
+	<property name="src.cas.sdk" value="${src.ucenter}/com/easou/cas/sdk" />
+	<property name="src.cas.client" value="${src.ucenter}/com/easou/cas/client" />
+	<property name="src.common.util" value="${src.common}/util" />
+	<property name="src.session" value="${src.ucenter}/com/easou/session" />
+	<property name="src.docroot" value="${src}/webapp" />
+	<property name="src.classes" value="${src}/etc/classes" />
+	<property name="src.lib" value="${src}/lib" />
+	<property name="version.dir" value="${src}/version"/>
+	<property name="client.version.dir" value="${version.dir}/client"/>
+	<property name="server.version.dir" value="${version.dir}/server"/>
+	<property name="test.classes" value="${src}/etc/classes" />
+
+	<!-- Destination directory for the build -->
+	<property name="build" value="${basedir}/build" />
+	<property name="build.docdir" value="${build}/docs" />
+	<property name="build.baseClass" value="${build}/classes" />
+	<property name="build.sso.classesdir" value="${build.baseClass}/sso" />
+	<property name="build.casclient.classesdir" value="${build.baseClass}/client" />
+	<property name="build.libpath" value="${src.lib}" />
+	<property name="build.unuselib" value="${src}/unuselib" />
+	<property name="build.lib" value="${build}/lib" />
+	<property name="build.war" value="${build}/war" />
+
+
+
+	<tstamp>
+		<format property="build.date" pattern="yyyy-MM-dd HH:mm" />
+	</tstamp>
+
+
+	<path id="build.classpath">
+		<fileset dir="${build.libpath}">
+			<include name="**/*.jar" />
+		</fileset>
+		<pathelement path="${build.classesdir}" />
+	</path>
+
+	<patternset id="java.files.pattern" includes="**/*.java" />
+	<!-- ======================================================= -->
+	<!-- Clean up various files and directories.                 -->
+	<!-- ======================================================= -->
+	<target name="clean_class">
+		<delete dir="${build}/classes" />
+	</target>
+
+	<target name="clean">
+		<delete dir="${dist}" />
+		<delete dir="${build}" />
+		<delete dir="${assemble}" />
+	</target>
+
+	<target name="cleanwar">
+		<delete dir="${assemble}/war" />
+	</target>
+
+	<target name="fixforunix">
+		<fixcrlf cr="remove" eof="remove" includes="**/*.jsp,**/*.html,**/*.tld,**/*.xml,**/*.java,**/*.sh,**/*.sql" srcdir="${src}" />
+	</target>
+
+
+
+
+	<!-- ======================================================= -->
+	<!-- Compile all classes.                                    -->
+	<!-- ======================================================= -->
+
+	<target name="compile_sso">
+		<mkdir dir="${build.sso.classesdir}" />
+		<mkdir dir="${build.lib}" />
+		<javac debug="on" deprecation="yes" destdir="${build.sso.classesdir}" srcdir="${src.ucenter}:${src.casservice}:${src.casclient}" includes="**" optimize="on">
+			<compilerarg line="-encoding UTF-8 " />
+			<classpath refid="build.classpath" />
+		</javac>
+	</target>
+
+	<target name="compile_cas_client">
+		<mkdir dir="${build.lib}" />
+		<mkdir dir="${build.casclient.classesdir}" />
+		<javac debug="on" deprecation="yes" destdir="${build.casclient.classesdir}" srcdir="${src.common}:${src.cas.auth}:${src.cas.sdk}:${src.cas.client}" includes="**" optimize="on">
+			<compilerarg line="-encoding UTF-8 " />
+			<classpath refid="build.classpath" />
+		</javac>
+	</target>
+	
+	<target name="compile_cas_sdk">
+		<mkdir dir="${build.lib}" />
+		<mkdir dir="${build.casclient.classesdir}" />
+		<javac debug="on" deprecation="yes" destdir="${build.casclient.classesdir}" srcdir="${src.common}:${src.cas.auth}:${src.cas.sdk}" includes="**" optimize="on">
+			<compilerarg line="-encoding UTF-8 " />
+			<classpath refid="build.classpath" />
+		</javac>
+	</target>
+
+
+
+	<!-- ======================================================= -->
+	<!-- make a jar -->
+	<!-- ======================================================= -->
+	<target depends="clean_class, compile_sso" name="sso.jar">
+		<delete verbose="true" deleteonexit="true">
+			<fileset dir="${build.lib}">
+				<include name="sso.jar" />
+			</fileset>
+		</delete>
+		<jar jarfile="${build.lib}/sso.jar" manifest="${server.version.dir}/META-INF/MANIFEST.MF">
+			<fileset dir="${build.sso.classesdir}">
+				<include name="**/*.class" />
+			</fileset>
+			<fileset dir="${src.ucenter}">
+				<include name="**/*.xml" />
+			</fileset>
+		</jar>
+	</target>
+
+	<target depends="clean_class, compile_cas_client" name="usr-client.jar">
+		<delete verbose="true" deleteonexit="true">
+			<fileset dir="${build.lib}">
+				<include name="usr-client.jar" />
+			</fileset>
+		</delete>
+		<jar jarfile="${build.lib}/usr-client.jar" manifest="${client.version.dir}/META-INF/MANIFEST.MF">
+			<fileset dir="${build.casclient.classesdir}">
+				<include name="**/*.class" />
+			</fileset>
+		</jar>
+	</target>
+	
+	<target depends="clean_class, compile_cas_sdk" name="easou-usercenter-sdk.jar">
+			<delete verbose="true" deleteonexit="true">
+				<fileset dir="${build.lib}">
+					<include name="easou-usercenter-sdk.jar" />
+				</fileset>
+			</delete>
+			<jar jarfile="${build.lib}/easou-usercenter-sdk.jar" manifest="${client.version.dir}/META-INF/MANIFEST.MF">
+				<fileset dir="${build.casclient.classesdir}">
+					<include name="**/*.class" />
+				</fileset>
+			</jar>
+		</target>
+
+	<target depends="sso.jar, usr-client.jar,easou-usercenter-sdk.jar" name="compile_all" >
+		<delete dir="${build.baseClass}" />
+	</target>
+
+	<target depends="cleanwar,unpackwar" name="war">
+		<delete dir="${build}" includes="${war}" deleteonexit="true" />
+		<war destfile="${build}/${war}" webxml="${build.war}/WEB-INF/web.xml">
+			<fileset dir="${build.war}" excludes="**/web.xml" />
+		</war>
+	</target>
+	
+	<target depends="cleanwar,unpacktestwar" name="war.test">
+		<delete dir="${build}" includes="${war}" deleteonexit="true" />
+		<war destfile="${build}/${war}" webxml="${build.war}/WEB-INF/web.xml">
+			<fileset dir="${build.war}" excludes="**/web.xml" />
+		</war>
+	</target>
+
+	<target depends="sso.jar" name="unpackwar">
+		<delete dir="${build.war}" deleteonexit="true" />
+		<mkdir dir="${build.war}" />
+		<copy todir="${build.war}/">
+			<fileset dir="${src.docroot}" excludes="WEB-INF/classes/**" />
+		</copy>
+		<copy todir="${build.war}/WEB-INF/classes">
+			<fileset dir="${src.classes}" />
+		</copy>
+		<copy todir="${build.war}/WEB-INF/lib/">
+			<fileset dir="${src.lib}" />
+			<fileset dir="${build.lib}" includes="sso.jar" />
+		</copy>
+	</target>
+	
+	<target depends="sso.jar" name="unpacktestwar">
+			<delete dir="${build.war}" deleteonexit="true" />
+			<mkdir dir="${build.war}" />
+			<copy todir="${build.war}/">
+				<fileset dir="${src.docroot}" excludes="WEB-INF/classes/**" />
+			</copy>
+			<copy todir="${build.war}/WEB-INF/classes">
+				<fileset dir="${test.classes}" />
+			</copy>
+			<copy todir="${build.war}/WEB-INF/lib/">
+				<fileset dir="${src.lib}" />
+				<fileset dir="${build.lib}" includes="sso.jar" />
+			</copy>
+		</target>
+	
+	<target name="tomcatinstall" depends="war">
+		<!--<copy file="${assemble}/${war}" todir="${tomcat.home}/webapps"/>-->
+		<copy todir="${tomcat.home}/" file="${build}/${war}">
+		</copy>
+	</target>
+
+</project>

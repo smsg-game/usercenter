@@ -1,0 +1,234 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/"
+	threshold="debug">
+	<!-- 输出到控制台-->
+    <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+		<param name="Target" value="System.out" />
+		<!-- 输出debug级别之上的日志信息 -->
+		<param name="Threshold" value="debug" />
+		<!--param name="DatePattern" value="'.'yyyy-MM-dd" /-->
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="[%-5p] [%d{HH:mm:ss}] [%C{1},%L]- %m%n" />
+		</layout>
+	</appender>
+
+	<!-- 系统错误日志 -->
+	<appender name="error" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="threshold" value="error" />
+		<param name="File" value="/log/resin-uc/sso/bizlog/error/error.log" />
+		<param name="DatePattern" value="'.'yyyy-MM-dd" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="[%-5p] [%d{HH:mm:ss}] [%C{1},%L]- %m%n" />
+		</layout>
+	</appender>
+
+	<!-- 用户中心日志记录-->
+	<appender name="debug" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="/log/resin-uc/sso/bizlog/debug/debug.log" />
+		<param name="DatePattern" value="'.'yyyy-MM-dd" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="[%-5p] [%d{HH:mm:ss}] [%C{1},%L]- %m%n" />
+		</layout>
+		<filter class="org.apache.log4j.varia.LevelRangeFilter">
+			<param name="LevelMin" value="debug" />
+			<param name="LevelMax" value="warn" />
+			<param name="acceptOnMatch" value="true" />
+		</filter>
+	</appender>
+	
+	<!--memcached缓存日志 -->
+	<appender name="memcached" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="/log/resin-uc/sso/bizlog/memcached/memcached.log" />
+		<param name="DatePattern" value="'.'yyyy-MM-dd" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="[%-5p] [%d{HH:mm:ss}] [%C{1},%L]- %m%n" />
+		</layout>
+	</appender>
+    
+    <!-- 用户注册日志 -->
+	<appender name="regLog" class="org.apache.log4j.FileAppender">
+		<param name="File" value="/log/resin-uc/bizlog/regLog/regLog.log" />
+		<!-- param name="DatePattern" value="'.'yyyyMMddHH" /-->
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%m%n" />
+		</layout>
+	</appender>
+
+	<!-- 用户登陆日志 -->
+	<appender name="loginLog" class="org.apache.log4j.FileAppender"> 
+		<param name="File" value="/log/resin-uc/bizlog/loginLog/loginLog.log" />
+        <!-- param name="DatePattern" value="'.'yyyyMMddHH" /-->
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%m%n" />
+		</layout>
+	</appender>
+    
+    <!-- 下发短信 -->
+	<appender name="smsLog" class="org.apache.log4j.FileAppender">
+		<param name="File" value="/log/resin-uc/bizlog/smsLog/smsLog.log" />
+		<!-- param name="DatePattern" value="'.'yyyyMMddHH" /-->
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%m%n" />
+		</layout>
+	</appender>
+	
+	 <!-- ST验证日志 -->
+	<appender name="stLog" class="org.apache.log4j.FileAppender">
+		<param name="File" value="/log/resin-uc/bizlog/stLog/stLog.log" />
+		<!--param name="DatePattern" value="'.'yyyyMMddHH" /-->
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%m%n" />
+		</layout>
+	</appender>
+	
+	 <!-- 手机号绑定日志 -->
+	<appender name="bindLog" class="org.apache.log4j.FileAppender">
+		<param name="File" value="/log/resin-uc/bizlog/bindLog/bindLog.log" />
+		<!--param name="DatePattern" value="'.'yyyyMMddHH" /-->
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%m%n" />
+		</layout>
+	</appender>
+	
+	<!-- 用户登陆游戏日志-->
+	<appender name="gLoginLog" class="org.apache.log4j.FileAppender"> 
+		<param name="File" value="/log/resin-uc/bizlog/gLoginLog/gLoginLog.log" />
+        <!-- param name="DatePattern" value="'.'yyyyMMddHH" /-->
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%m%n" />
+		</layout>
+	</appender>
+	    
+    <!--appender name="CoalescingStatistics" class="org.perf4j.log4j.AsyncCoalescingStatisticsAppender">
+        <param name="TimeSlice" value="60000"/>
+        <appender-ref ref="fileAppender"/>
+        <appender-ref ref="graphExecutionTimes"/>
+        <appender-ref ref="graphExecutionTPS"/>
+    </appender-->
+	
+	<!-- This file appender is used to output aggregated performance statistics -->
+    <appender name="fileAppender" class="org.apache.log4j.FileAppender">
+        <param name="File" value="/log/resin-uc/sso/bizlog/perfStats/perfStats.log"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%m%n"/>
+        </layout>
+    </appender>
+
+   <appender name="graphExecutionTimes" class="org.perf4j.log4j.GraphingStatisticsAppender">
+           <!-- Possible GraphTypes are Mean, Min, Max, StdDev, Count and TPS -->
+           <param name="GraphType" value="Mean"/>
+           <!-- The tags of the timed execution blocks to graph are specified here -->
+           <param name="TagNamesToGraph" value="DESTROY_TICKET_GRANTING_TICKET,GRANT_SERVICE_TICKET,GRANT_PROXY_GRANTING_TICKET,VALIDATE_SERVICE_TICKET,CREATE_TICKET_GRANTING_TICKET" />
+       </appender>
+
+       <appender name="graphExecutionTPS" class="org.perf4j.log4j.GraphingStatisticsAppender">
+           <param name="GraphType" value="TPS" />
+           <param name="TagNamesToGraph" value="DESTROY_TICKET_GRANTING_TICKET,GRANT_SERVICE_TICKET,GRANT_PROXY_GRANTING_TICKET,VALIDATE_SERVICE_TICKET,CREATE_TICKET_GRANTING_TICKET" />
+       </appender>
+ 
+     <!--logger name="org.perf4j.TimingLogger" additivity="false">
+        <level value="ERROR" />
+        <appender-ref ref="CoalescingStatistics" />
+    </logger-->
+	
+	<logger name="com.easou" additivity="false">
+		<level value="info" />
+		<appender-ref ref="CONSOLE" />
+	</logger>
+	
+	<logger name="com.easou.usercenter.cache" additivity="false">
+		<level value="info" />
+		<appender-ref ref="CONSOLE" />
+	</logger>
+	
+	<logger name="com.easou.usercenter.socket" additivity="false">
+		<level value="info" />
+		<appender-ref ref="CONSOLE" />
+	</logger>
+	
+	<logger name="com.easou.usercenter" additivity="false">
+		<level value="debug" />
+		<appender-ref ref="CONSOLE" />
+	</logger>
+	
+	<logger name="com.danga" additivity="false">
+		<level value="debug" />
+		<!--appender-ref ref="memcached" /-->
+		<appender-ref ref="CONSOLE" />
+	</logger>
+
+	<logger name="com.schooner" additivity="false">
+		<level value="debug" />
+		<!-- appender-ref ref="memcached" /-->
+		<appender-ref ref="CONSOLE" />
+	</logger>
+	
+	  <logger name="org.springframework">
+        <level value="warn" />
+		<appender-ref ref="CONSOLE" />
+    </logger>
+
+    <!-- logger name="org.springframework.web">
+        <level value="debug" />
+		<appender-ref ref="CONSOLE" />
+    </logger-->
+    
+	<logger name="org.jasig.cas" additivity="false">
+		<level value="debug" />
+		<appender-ref ref="CONSOLE" />
+	</logger>
+
+	<logger name="com.ibatis" additivity="false">
+		<level value="debug" />
+		<appender-ref ref="CONSOLE" />
+	</logger>
+
+	<logger name="java.sql" additivity="false">
+		<level value="debug" />
+		<appender-ref ref="CONSOLE" />
+	</logger>
+
+	<logger name="com.easou.usercenter.datasource.aop" additivity="false">
+		<level value="debug" />
+		<appender-ref ref="CONSOLE" />
+	</logger>
+		
+	<!-- 登录日志记录 -->
+	<logger name="biz.loginLog" additivity="false">
+		<level value="debug" />
+		<appender-ref ref="loginLog" />
+	</logger>
+	<!-- 注册日志记录 -->
+	<logger name="biz.regLog" additivity="false">
+		<level value="info" />
+		<appender-ref ref="regLog" />
+	</logger>
+	
+	<!-- SMS日志记录 -->
+	<logger name="biz.smsLog" additivity="false">
+		<level value="info" />
+		<appender-ref ref="smsLog" />
+	</logger>
+	<!-- ST日志记录 -->
+	<logger name="biz.stLog" additivity="false">
+		<level value="info" />
+		<appender-ref ref="stLog" />
+	</logger>
+	<!-- 手机号绑定日志记录 -->
+	<logger name="biz.bindLog" additivity="false">
+		<level value="info" />
+		<appender-ref ref="bindLog" />
+	</logger>
+    <!-- 游戏登录日志 -->
+	<logger name="biz.gLoginLog" additivity="false">
+		<level value="info" />
+		<appender-ref ref="gLoginLog" />
+	</logger>
+	
+	<root>
+		<priority value="ERROR" />
+		<!-- appender-ref ref="error" /-->
+		<appender-ref ref="CONSOLE"/>
+	</root>
+</log4j:configuration>

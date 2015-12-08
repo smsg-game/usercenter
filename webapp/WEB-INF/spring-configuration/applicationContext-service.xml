@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+      http://www.springframework.org/schema/context
+      http://www.springframework.org/schema/context/spring-context.xsd
+      http://www.springframework.org/schema/mvc
+      http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+	  http://www.springframework.org/schema/tx
+      http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+      http://www.springframework.org/schema/aop
+	  http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+	  
+	  
+	  
+	<bean id="eucUserServiceImpl" name="eucUserServiceImpl"
+		class="com.easou.usercenter.service.impl.EucUserServiceImpl">
+		<property name="eucUserDao" ref="eucUserDao" />
+	</bean>
+
+	<bean id="mobileService" class="com.easou.usercenter.service.impl.MobileServiceImpl">
+		<property name="cache" ref="defaultCache"></property>
+	</bean>
+	
+	<bean id="urlTransService" class="com.easou.usercenter.service.impl.UrlTransService">
+		<property name="cache" ref="defaultCache"></property>
+	</bean>
+	
+	<bean id="registerService" class="com.easou.usercenter.service.impl.RegisterServiceImpl">
+		<property name="cache" ref="defaultCache"></property>
+	</bean>
+	
+	<bean id="eucPrivilegeServiceImpl" name="eucPrivilegeServiceImpl"
+		class="com.easou.usercenter.service.impl.EucPrivilegeServiceImpl">
+		<property name="eucPrivilegeDao" ref="eucPrivilegeDao" />
+	</bean>
+	
+	<bean id="eucSignatureServiceImpl" name="eucSignatureServiceImpl"
+		class="com.easou.usercenter.service.impl.EucSignatureServiceImpl">
+		<property name="eucSignatureDao" ref="eucSignatureDao" />
+	</bean>
+	
+    <bean id="eucAppService" class="com.easou.usercenter.service.impl.EucAppServiceImpl">
+        <property name="eucAppDao" ref="eucAppDao" />
+    </bean>
+	
+	<!-- 外部用户注册类 -->
+	<bean id="oUserService" class="com.easou.usercenter.service.impl.OUserServiceImpl">
+        <property name="eucUserService" ref="eucUserServiceImpl" />
+        <property name="outUserBindService" ref="ouserBindService" />
+    </bean>
+    
+	<bean id="hisGamesService" class="com.easou.usercenter.service.impl.HisGamesServiceImpl">
+	</bean>
+	
+	<bean id="currencyService" class="com.easou.usercenter.service.impl.CurrencyServiceImpl">
+	</bean>
+    
+    <bean id="authVerifyService" class="com.easou.usercenter.service.impl.AuthVerifyServiceImpl">
+        <property name="ticketRegistry" ref="ticketRegistry" />
+    </bean>
+    
+    <bean id="asynUserManager" class="com.easou.usercenter.asyn.impl.AsynUserManagerImpl">
+        <property name="eucUserService" ref="eucUserServiceImpl" />
+    </bean>
+    
+     <bean id="asynGameManager" class="com.easou.usercenter.asyn.impl.AsynGameManagerImpl">
+    </bean>
+    
+    <bean id="asynSendSmsManager" class="com.easou.usercenter.asyn.impl.AsynSendSmsManagerImpl">
+    </bean>
+    
+</beans>
+	  

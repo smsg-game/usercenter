@@ -1,0 +1,975 @@
+<?xml version="1.0" encoding="UTF-8"?>                   
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+	version="2.4">
+	<display-name>Central Authentication System (CAS) 3.4.10</display-name>
+
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>
+			/WEB-INF/spring-configuration/*.xml
+		</param-value>
+	</context-param>
+
+
+	<!--
+		- Location of the Log4J config file, for initialization and refresh checks.
+		- Applied by Log4jConfigListener.
+	-->
+	<context-param>
+		<param-name>log4jConfigLocation</param-name>
+		<param-value>classpath:log4j.xml</param-value>
+	</context-param>
+	
+	<context-param>
+		<param-name>log4jExposeWebAppRoot</param-name>
+		<param-value>false</param-value>
+	</context-param>
+
+<!--
+    Specify that the log4j configuration should be reloaded periodically
+    to pick up changes
+  -->
+  <context-param>
+    <param-name>log4jRefreshInterval</param-name>
+    <param-value>60000</param-value>
+  </context-param>
+  
+  <!-- Character Encoding filter -->
+	<filter>
+		<filter-name>encodingFilter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+	</filter>
+  
+  <filter>
+		<filter-name>requestWrap</filter-name>
+		<filter-class>org.jasig.cas.http.CasRequestFilter</filter-class>
+		<init-param>
+        	<param-name>excludeUri</param-name>
+        	<param-value>/api2/.*|/api/.*|/test\.jsp|.*\.css|.*\.js|.*\.png|.*\.jpg|.*\.gif</param-value>
+        </init-param>
+	</filter>
+	
+	
+    <filter-mapping>
+		<filter-name>encodingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
+	<filter-mapping>
+        <filter-name>requestWrap</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    
+	
+	<!--filter>
+		<filter-name>CAS Client Info Logging Filter</filter-name>
+		<filter-class>com.github.inspektr.common.web.ClientInfoThreadLocalFilter</filter-class>
+	</filter-->
+	
+	<filter>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
+
+    <filter>
+        <filter-name>characterEncodingFilter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>characterEncodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+      <filter-name>springSecurityFilterChain</filter-name>
+      <url-pattern>/services/*</url-pattern>
+    </filter-mapping>
+
+	<!-- filter-mapping>
+		<filter-name>CAS Client Info Logging Filter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping-->
+
+   <filter>
+		<filter-name>CAS Filter</filter-name>
+		<filter-class>com.easou.cas.authenticateion.EAuthenticationFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>CAS Filter</filter-name>
+		<url-pattern>/user/*</url-pattern>
+	</filter-mapping>
+	<filter>
+		<filter-name>CAS Game Filter</filter-name>
+		<filter-class>com.easou.cas.authenticateion.GameAuthenticationFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>CAS Game Filter</filter-name>
+		<url-pattern>/game/*</url-pattern>
+	</filter-mapping>
+	
+	<!-- 
+	<filter-mapping>
+		<filter-name>CAS Filter</filter-name>
+		<url-pattern>/user/*.jsp</url-pattern>
+	</filter-mapping>
+	 -->
+	<!-- filter>
+		<filter-name>CAS validate</filter-name>
+		<filter-class>com.easou.cas.validation.ECas20ProxyReceivingTicketValidationFilter</filter-class>
+		<init-param>
+			<param-name>useSession</param-name>
+			<param-value>true</param-value>
+		</init-param>
+		<init-param>
+			<param-name>redirectAfterValidation</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>CAS validate</filter-name>
+		<url-pattern>/user/*</url-pattern>
+	</filter-mapping>
+
+	<filter-mapping>
+		<filter-name>CAS validate</filter-name>
+		<url-pattern>/game/*</url-pattern>
+	</filter-mapping-->
+	
+	<!--
+		- Configures Log4J for this web app.
+		- As this context specifies a context-param "log4jConfigLocation", its file path
+		- is used to load the Log4J configuration, including periodic refresh checks.
+		-
+		- Would fall back to default Log4J initialization (non-refreshing) if no special
+		- context-params are given.
+		-
+		- Exports a "web app root key", i.e. a system property that specifies the root
+		- directory of this web app, for usage in log file paths.
+		- This web app specifies "cas.root" (see log4j.properties file).
+	-->
+	<!-- Leave the listener commented-out if using JBoss -->
+	<listener>
+		<listener-class>
+			org.springframework.web.util.Log4jConfigListener
+		</listener-class>
+	</listener>
+
+	<!--
+		- Loads the CAS ApplicationContext.  
+		- The deployer choice here is how to handle Throwables thrown by Spring's 
+		- ContextLoaderListener.  The Spring ContextLoaderListener will throw an exception when the
+		- application context cannot be loaded, say because the bean XML files are not valid XML or do not
+		- refer to real classes and properties or because a bean configured via Spring throws an exception
+		- at construction, property setting, or on an afterPropertiesSet() lifecycle method.
+		-
+		- If you'd like these errors to be fatal and prevent the CAS servlet context from loading at all,
+		- use org.springframework.web.context.ContextLoaderListener.
+		-
+		- If you'd like these errors to result in all requests for CAS getting a "CAS is Unavailable" response, 
+		- use org.jasig.cas.web.init.SafeContextLoaderListener
+	-->
+	<listener>
+		<listener-class>
+			com.easou.cas.web.init.ESafeContextLoaderListener
+		</listener-class>
+	</listener>
+
+	<!--
+		- This is the Spring dispatcher servlet which delegates all requests to the 
+		- Spring WebMVC controllers as configured in cas-servlet.xml.
+		-   
+		- The choice made above about how to handle a broken ApplicationContext at 
+		- context initialization applies here as well, since this servlet is load-on-startup.
+		-
+		- If you'd like these errors to be fatal and prevent the CAS servlet from loading at all,
+		- use org.springframework.web.servlet.DispatcherServlet.
+		-
+		- If you'd like these errors to result in all requests for CAS getting a "CAS is Unavailable" response, 
+		- use org.jasig.cas.web.init.SafeDispatcherServlet
+	-->
+	<servlet>
+		<servlet-name>cas</servlet-name>
+		<servlet-class>
+			org.jasig.cas.web.init.SafeDispatcherServlet
+		</servlet-class>
+		<init-param>
+			<param-name>publishContext</param-name>
+			<param-value>false</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>cas</servlet-name>
+		<url-pattern>/login</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>cas</servlet-name>
+		<url-pattern>/game/touch/gtLogin</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>cas</servlet-name>
+		<url-pattern>/extLogin</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>cas</servlet-name>
+		<url-pattern>/logout</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>cas</servlet-name>
+		<url-pattern>/validate</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>cas</servlet-name>
+		<url-pattern>/serviceValidate</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>cas</servlet-name>
+		<url-pattern>/samlValidate</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>cas</servlet-name>
+		<url-pattern>/proxy</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>cas</servlet-name>
+		<url-pattern>/proxyValidate</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>cas</servlet-name>
+		<url-pattern>/CentralAuthenticationService</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>cas</servlet-name>
+		<url-pattern>/services/add.html</url-pattern>
+	</servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>cas</servlet-name>
+        <url-pattern>/services/viewStatistics.html</url-pattern>
+    </servlet-mapping>
+
+
+	<servlet-mapping>
+		<servlet-name>cas</servlet-name>
+		<url-pattern>/services/logout.html</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>cas</servlet-name>
+		<url-pattern>/services/loggedOut.html</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>cas</servlet-name>
+		<url-pattern>/services/manage.html</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>cas</servlet-name>
+		<url-pattern>/services/edit.html</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>cas</servlet-name>
+		<url-pattern>/openid/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>cas</servlet-name>
+		<url-pattern>/services/deleteRegisteredService.html</url-pattern>
+	</servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>cas</servlet-name>
+        <url-pattern>/authorizationFailure.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>cas</servlet-name>
+        <url-pattern>/403.html</url-pattern>
+    </servlet-mapping>
+    
+	<servlet-mapping>
+		<servlet-name>cas</servlet-name>
+		<url-pattern>/inlogin</url-pattern>
+	</servlet-mapping>
+
+	<session-config>
+		<!-- Default to 5 minute session timeouts -->
+		<session-timeout>30</session-timeout>
+	</session-config>
+
+	<error-page>
+		<exception-type>org.springframework.context.ApplicationContextException</exception-type>
+		<location>/view/jsp/brokenContext.jsp</location>
+	</error-page>
+
+	<error-page>
+        <error-code>500</error-code>
+		<location>/view/jsp/errors.jsp</location>
+	</error-page>
+
+	<error-page>
+		<error-code>404</error-code>
+		<location>/</location>
+	</error-page>
+
+    <error-page>
+        <error-code>403</error-code>
+        <location>/403.html</location>
+    </error-page>
+	
+	<welcome-file-list>
+  		<welcome-file>index.jsp</welcome-file>
+  	</welcome-file-list> 
+  	
+    <!-- user servlet -->
+  	<servlet>
+		<servlet-name>user</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	
+  	 <!-- game servlet -->
+  	<servlet>
+		<servlet-name>game</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api/getOccupations</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api/getUserById</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api/getUserByMobile</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api/requestBindMobile</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api/applyBindMobile</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api/directlyBindMobile</url-pattern>
+	</servlet-mapping>
+	 
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api/updateUser</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api/updatePasswd</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api/regByRealMobile</url-pattern>
+	</servlet-mapping>
+	
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/check/show</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/check/getVeriCode</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/check/checkUserIdentified</url-pattern>
+	</servlet-mapping>
+	
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/bindMobile</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/bindcfm</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/changepass</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/userCenter</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/changeInfo</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/sbindUser</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/cancelBind</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/getHisGames</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/getECurr</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/pass/sforget</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/pass/findbym</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/pass/findbyem</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/pass/resetpass</url-pattern>
+	</servlet-mapping>
+	
+	<!--servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/nregist</url-pattern>
+	</servlet-mapping-->
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/mregist</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/smsregist</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api/registByMobile</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api/registByName</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api/requestResetPass</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api/applyResetPass</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api/login</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api/validate</url-pattern>
+	</servlet-mapping>
+	
+		<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api/logout</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api/resetPasswd</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api/upRegist</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/oRedirect</url-pattern>
+	</servlet-mapping>
+	
+	<!--servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/ouserBind</url-pattern>
+	</servlet-mapping-->
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/ologin</url-pattern>
+	</servlet-mapping>
+	
+  	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/loginTqq</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/loginRenren</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/loginQQ</url-pattern>
+	</servlet-mapping>
+	
+	<!--servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/oDefRegist</url-pattern>
+	</servlet-mapping-->
+
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/oregist</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api/requestVericode</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api/regByVericode</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api/autoAKeyRegist</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/emregist</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/bindEmail</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/jbMobile</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/pass/emresetpass</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/jbEmail</url-pattern>
+	</servlet-mapping>
+	
+	<!-- servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/</url-pattern>
+	</servlet-mapping-->
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/validate.json</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/validatenew.json</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/validateSerivceTicket.json</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/appUserCenter</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/writeCookie</url-pattern>
+	</servlet-mapping>
+	
+	<!-- api2 接口 -->
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/validate.json</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/validatenew.json</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/validateServiceTicket.json</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/getUserById.json</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/getUserByName.json</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/updateUser.json</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/updatePasswd.json</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/updatePasswd2.json</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/requestBindMobile.json</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/applyBindEmail.json</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/applyBindEmail.json</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/confirmEmail.do</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/findpwdByEmail.json</url-pattern>
+	</servlet-mapping>
+	<!-- seek 2014-02-18 -->
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/requestUnBindMobile.json</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/applyUnBindMobile.json</url-pattern>
+	</servlet-mapping>
+	<!-- seek 2014-02-18 -->
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/login.json</url-pattern>
+	</servlet-mapping>
+	
+	
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/requestResetPass.json</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/applyResetPass.json</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/registByName.json</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/bookingName.json</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/checkName.json</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/autoRegist.json</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+    <servlet-name>user</servlet-name>
+    <url-pattern>/api2/requestMobileCode.json</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>user</servlet-name>
+    <url-pattern>/api2/regByMobileCode.json</url-pattern>
+  </servlet-mapping>
+  
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/getTrdBindList.json</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/jbindTrdUser.json</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/api2/jbindTrdUser.json</url-pattern>
+	</servlet-mapping>
+	<!-- api2 结束 -->
+	
+	<servlet-mapping>
+		<servlet-name>game</servlet-name>
+		<url-pattern>/game/touch/changeNName</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>game</servlet-name>
+		<url-pattern>/game/touch/userCenter</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>game</servlet-name>
+		<url-pattern>/game/touch/bindAccount</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>game</servlet-name>
+		<url-pattern>/game/touch/bindMobile</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>game</servlet-name>
+		<url-pattern>/game/touch/bindMobileNext</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>game</servlet-name>
+		<url-pattern>/game/touch/bindcfm</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>game</servlet-name>
+		<url-pattern>/game/touch/jbMobile</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>game</servlet-name>
+		<url-pattern>/game/touch/findbym</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>game</servlet-name>
+		<url-pattern>/game/touch/resetpass</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>game</servlet-name>
+		<url-pattern>/game/touch/resetSucc</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>game</servlet-name>
+		<url-pattern>/game/touch/sforget</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>game</servlet-name>
+		<url-pattern>/game/touch/gameShare</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>game</servlet-name>
+		<url-pattern>/game/touch/getHisGames</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>game</servlet-name>
+		<url-pattern>/game/touch/getECurr</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>game</servlet-name>
+		<url-pattern>/game/touch/switchUser</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>game</servlet-name>
+		<url-pattern>/game/touch/cancelBind</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>game</servlet-name>
+		<url-pattern>/game/touch/shareDiv</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>quick</servlet-name>
+		<servlet-class>
+			com.easou.usercenter.web.QuickLoginServlet
+		</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>quick</servlet-name>
+		<url-pattern>/quickLogin</url-pattern>
+	</servlet-mapping>	
+	<servlet-mapping>
+		<servlet-name>quick</servlet-name>
+		<url-pattern>/autoReg</url-pattern>
+	</servlet-mapping>	
+	<servlet>
+		<servlet-name>redirectTosetting</servlet-name>
+		<servlet-class>
+			com.easou.usercenter.web.usermodule.UserSettingCookieServlet
+		</servlet-class>
+	</servlet>	
+	<servlet-mapping>
+		<servlet-name>redirectTosetting</servlet-name>
+		<url-pattern>/redirectTosetting</url-pattern>
+	</servlet-mapping>	
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/usersetting.html</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/changeNickName</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/mchangepass</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/mbindMobile</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/mbindcfm</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/msendSms</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/mforget</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/mfindbym</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/mresetpass</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/mresetSucc</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/resetpass</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/switch</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/login</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/logout</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>mswitch</servlet-name>
+		<servlet-class>
+			com.easou.usercenter.web.usermodule.MSwitchUserServlet
+		</servlet-class>
+	</servlet>	
+	<servlet-mapping>
+		<servlet-name>mswitch</servlet-name>
+		<url-pattern>/mswitch</url-pattern>
+	</servlet-mapping>	
+	<servlet>
+		<servlet-name>mlogin</servlet-name>
+		<servlet-class>
+			com.easou.usercenter.web.usermodule.MUserLoginServlet
+		</servlet-class>
+	</servlet>	
+	<servlet-mapping>
+		<servlet-name>mlogin</servlet-name>
+		<url-pattern>/mlogin</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>user</servlet-name>
+		<url-pattern>/user/mbindMobileVerify</url-pattern>
+	</servlet-mapping>
+</web-app>

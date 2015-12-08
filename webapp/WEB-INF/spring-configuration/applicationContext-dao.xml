@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+      http://www.springframework.org/schema/context
+      http://www.springframework.org/schema/context/spring-context.xsd
+      http://www.springframework.org/schema/mvc
+      http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+	  http://www.springframework.org/schema/tx
+      http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+      http://www.springframework.org/schema/aop
+	  http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+  	
+	<context:annotation-config />
+	
+	
+	<bean id="eucUserDao" name="eucUserDao"
+		class="com.easou.usercenter.dao.impl.EucUserDaoImpl" parent="dynamicSqlSessionDaoSupport">
+	</bean>
+
+	<bean id="oUserDao" name="oUserDao"
+		class="com.easou.usercenter.dao.impl.OuserDaoImpl" parent="dynamicSqlSessionDaoSupport">
+	</bean>
+	
+	<bean id="eucPrivilegeDao" name="eucPrivilegeDao"
+		class="com.easou.usercenter.dao.impl.EucPrivilegeDaoImpl" parent="dynamicSqlSessionDaoSupport">
+	</bean>
+	
+	<bean id="eucSignatureDao" name="eucSignatureDao"
+		class="com.easou.usercenter.dao.impl.EucSignatureDaoImpl" parent="dynamicSqlSessionDaoSupport">
+	</bean>
+	
+	<bean id="eucAppDao" name="eucAppDao"
+		class="com.easou.usercenter.dao.impl.EucAppDaoImpl" parent="dynamicSqlSessionDaoSupport">
+	</bean>
+	
+	<!-- 数据源切换AOP类 -->
+	<bean id="switchDataSourceAop" class="com.easou.usercenter.datasource.aop.SwitchDataSourceAop">
+		<!-- 服务器类型 -->
+		<property name="serverType">
+			<value>${server.type}</value>
+		</property>
+	</bean>
+	
+	<aop:config proxy-target-class="false">	
+		<aop:aspect id="switchDataSourceAspect" ref="switchDataSourceAop">
+			<!--配置com.spring.service包下所有类或接口的所有方法-->
+			<aop:pointcut id="switchWriteDataSourcePointcut"
+				expression="execution(* com.easou.usercenter.dao.*.*.update*(..))||
+				execution(* com.easou.usercenter.dao.*.*.insert*(..))||execution(* com.easou.usercenter.dao.*.*.delete*(..))" />
+			<aop:pointcut id="switchDefaultDataSourcePointcut"
+				expression="execution(* com.easou.usercenter.dao.*.*.*(..))" />
+			<aop:before pointcut-ref="switchWriteDataSourcePointcut" method="doBefore" />
+			<aop:after pointcut-ref="switchDefaultDataSourcePointcut" method="doAfter" />
+			<!-- <aop:around pointcut-ref="switchDataSourcePointcut" method="doAround" /> -->
+			<aop:after-throwing pointcut-ref="switchWriteDataSourcePointcut"
+				method="doThrowing" throwing="ex" />
+		</aop:aspect>
+	</aop:config>
+	  
+
+</beans>

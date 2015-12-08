@@ -1,0 +1,304 @@
+.ui-btn-up,
+.ui-body-c, 
+.ui-body-c input, 
+.ui-body-c select, 
+.ui-body-c textarea, 
+.ui-body-c button,
+.ui-btn-up-c,
+.ui-btn-hover-c,
+.ui-btn-down-c,
+
+.ui-btn-active,
+.ui-loader-verbose h1, /* for error message */
+/* ---- for sso ---- */
+.ui-bar-a,  
+.ui-bar-a button,
+.ui-btn-up-a, 
+.ui-btn-hover-a, 
+.ui-btn-down-a
+
+.ui-bar-b,
+.ui-bar-b button,
+.ui-btn-up-b,
+.ui-btn-hover-b,
+.ui-btn-down-b {
+  font-weight: normal;
+  font-size: 16px;
+  font-family: 'Microsoft YaHei', '\5FAE\8F6F\96C5\9ED1', '华文细黑', '\534E\6587\7EC6\9ED1', Helvetica, Arial, sans-serif !important;
+}
+.ui-btn-text,
+textarea.ui-input-text,
+input.ui-input-text {
+  text-shadow: none;
+  font-size: 16px;
+}
+
+.ui-submit > .ui-btn-inner > .ui-btn-text,  /* for submit buttons */
+#user-switch .ui-btn > .ui-btn-inner > .ui-btn-text,
+.ui-header .ui-title, 
+.ui-footer .ui-title,
+#page-face > .ui-content > a .ui-btn-text {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+.ui-corner-all,
+.ui-btn-corner-all {
+  border-radius: 0.4em 0.4em 0.4em 0.4em;
+}
+.ui-shadow {
+  box-shadow: none;
+}
+.ui-bar-a {
+  text-shadow: 0 1px hsl(198, 85%, 30%);
+}
+.ui-btn-up-c,
+.ui-btn-hover-c {
+  background: none;
+  background-color: #fff;
+}
+.ui-btn-up-c:visited,
+.ui-btn-up-c a.ui-link-inherit {
+  color: #000;
+}
+.ui-focus, 
+.ui-btn:focus,
+.ui-input-text.ui-focus, 
+.ui-input-search.ui-focus {
+  box-shadow: none;
+}
+.ui-btn-active {
+  text-shadow: none;
+} 
+div.ui-input-text {
+  margin: 0;
+  margin-bottom: 1.5em;
+  background-color: #fff;
+}
+.ui-shadow-inset {
+  box-shadow: none;
+}
+.ui-body-c input {
+  height: 49px;
+}
+.ui-grid-a .ui-block-a {
+  width: 70%;
+}
+.ui-grid-a .ui-block-b {
+  width: 30%;
+}
+.ui-grid-a .ui-block-b .ui-btn-inner {
+  text-overflow: initial;
+}
+div[data-role=content] {
+  margin-top: 10px;
+}
+
+body {
+  color: #010101;
+  font-size: 12.5px;
+}
+
+.font-striking {
+  color: #ff632c;
+}
+
+.font-status {
+  color: #9b9797;
+}
+
+a:visited {
+  color: #000;
+}
+a[data-role=button]:visited {
+  color: #fff;
+}
+a[data-role=button] {
+  margin-left: 0 auto;
+  height: 46px;
+}
+a[data-role=button].ui-btn-up-a,
+a[data-role=button].ui-btn-hover-a {
+  border: none;
+  background: url(http://testsso.fantingame.com/view/jsp/usermodule/images/bg/btn-blue.png) repeat-x;
+}
+a[data-role=button].ui-btn-down-a {
+  border: none;
+  background: url(http://testsso.fantingame.com/view/jsp/usermodule/images/bg/btn-orange.png) repeat-x;
+}
+a[data-role=button] .ui-btn-text {
+  color: #fff !important;
+  text-shadow: none;
+}
+a[data-role=button] .ui-btn-inner {
+  border-top: none;
+}
+
+
+.ui-btn-up-b,
+.ui-btn-hover-b {
+  min-height: 45px;
+  border: none;
+  background: url(http://testsso.fantingame.com/view/jsp/usermodule/images/bg/btn-blue.png) repeat-x;
+}
+.ui-btn-down-b {
+  border: none;
+  background: url(http://testsso.fantingame.com/view/jsp/usermodule/images/bg/btn-orange.png) repeat-x;
+}
+
+#pwd-recaller-executor fieldset .ui-block-b .ui-btn,
+#user-switch-executor fieldset .ui-block-b .ui-btn,
+#phone-binding-executor fieldset .ui-block-b .ui-btn,
+#page-repwd fieldset .ui-block-b .ui-btn {
+  border: 1px solid #aaa;
+}
+
+#pwd-recaller-executor fieldset .ui-block-b .ui-btn,
+#user-switch-executor fieldset .ui-block-b .ui-btn,
+#phone-binding-executor fieldset .ui-block-b .ui-btn,
+#page-repwd fieldset .ui-block-b .ui-btn {
+  height: 49px; /* for .ui-body-c input, equals 51 - 2 (border: top + bottom)   */
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  background: url(http://testsso.fantingame.com/view/jsp/usermodule/images/bg/btn-half-grey.png) repeat-x;
+}
+#page-repwd fieldset .ui-block-b .ui-btn,
+#user-switch-executor fieldset .ui-block-b .ui-btn {
+  margin: 0;
+}
+#pwd-recaller-executor fieldset .ui-block-b .ui-btn,
+#phone-binding-executor fieldset .ui-block-b .ui-btn {
+  margin: 0 0 0.6em 0;
+}
+#user-switch-executor .ui-grid-a  {
+  margin: 0.6em 0 0 0;
+}
+
+#pwd-recaller-executor fieldset .ui-block-b .ui-btn-down-a,
+#user-switch-executor fieldset .ui-block-b .ui-btn-down-a,
+#phone-binding-executor fieldset .ui-block-b .ui-btn-down-a,
+#page-repwd fieldset .ui-block-b .ui-btn-down-b {
+  background: url(http://testsso.fantingame.com/view/jsp/usermodule/images/bg/btn-half-grey-down.png) repeat-x;
+}
+#pwd-recaller-executor fieldset .ui-block-b .ui-btn-text,
+#user-switch-executor fieldset .ui-block-b .ui-btn-text,
+#phone-binding-executor fieldset .ui-block-b .ui-btn-text,
+#page-repwd fieldset .ui-block-b .ui-btn-up-b,
+#page-repwd fieldset .ui-block-b .ui-btn-hover-b,
+#page-repwd fieldset .ui-block-b .ui-btn-down-b {
+  color: #9b9797 !important;
+  text-shadow: none !important;
+}
+#pwd-recaller-executor fieldset .ui-block-b .ui-btn-inner,
+#user-switch-executor fieldset .ui-block-b .ui-btn-inner,
+#phone-binding-executor fieldset .ui-block-b .ui-btn-inner,
+#page-repwd fieldset .ui-block-b .ui-btn-inner {
+  padding: 1em 0;
+}
+#pwd-recaller-executor fieldset div.ui-input-text,
+#user-switch-executor fieldset div.ui-input-text,
+#phone-binding-executor fieldset div.ui-input-text,
+#page-repwd fieldset div.ui-input-text {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+div[data-role=header] {
+  box-shadow: 0 0 5px 2px #ccc;
+}
+div[data-role=header] .ui-btn-up-b,
+div[data-role=header] .ui-btn-hover-b {
+  min-height: 0;
+  background: none;
+}
+div[data-role=header].ui-bar-a {
+  border: 1px solid hsl(198, 85%, 60%);
+  /* background: linear-gradient(hsl(199, 83%, 68%), hsl(199, 83%, 50%)) repeat scroll 0% 0% hsl(199, 83%, 50%); */
+  background: url(http://testsso.fantingame.com/view/jsp/usermodule/images/bg/header.png) repeat-x;
+}
+div[data-role=header] .ui-btn-corner-all {
+  border-radius: 1em 1em 1em 1em;
+}
+div[data-role=header] .ui-icon-shadow {
+  box-shadow: none;
+}
+
+div[data-role=header] .ui-icon {
+  background-color: rgba(0, 0, 0, 0);
+}
+div[data-role=header] .ui-bar-b .ui-shadow {
+  box-shadow: none;
+}
+
+/* for icon '>' */
+.ui-icon, .ui-icon-searchfield:after {
+  border-radius: 9px 9px 9px 9px;
+  background-color: rgba(0, 0, 0, 0);
+  background-image: url("../vendor/jquery-mobile/images/icons-18-black.png");
+  background-repeat: no-repeat;
+  opacity: 0.4;
+}
+
+/* for user-switch.jsp description */
+#user-switch div[data-role=content] {
+  color: #9b9797;
+  font-size: 14px;
+  line-height: 2em;
+}
+#user-switch #last-para {
+  margin-bottom:30px;
+}
+
+/* for 'recommand', 'binded' tags' border. */
+.ui-btn-text .ui-btn-up-c {
+  border: none;
+}
+
+#nickname-label {
+	padding-right: 10px;
+	margin-right: 10px;
+	border-right: 1px solid #9b9797;
+	font-weight: 900;
+}
+
+/*mask*/
+#mask{
+ position:absolute;
+ top:0px;
+ left:0px;
+ width:100%;
+}
+ 
+#mask .maskBg{
+position:absolute;
+	z-index:100;
+	width:100%;
+	height:10000px;
+	background: #000000;
+	opacity: 0.22;
+	filter:alpha(opacity=22);
+	-moz-opacity:0.22;
+	-khtml-opacity: 0.22;
+}
+ 
+#mask .maskContent{
+	position:absolute;
+	z-index:101;
+	width:65%;
+	border-radius:0.4em;
+	background-color:#000000;
+	text-align:center;
+	opacity: 0.4;
+	filter:alpha(opacity=40);
+	-moz-opacity:0.4;
+	-khtml-opacity: 0.4;
+}
+#mask .maskText{
+	position:absolute;
+	z-index:102;
+	width:65%;
+	color:#FFFFFF;
+	text-align:center;
+	text-shadow: none;
+	font-size:16px;
+}

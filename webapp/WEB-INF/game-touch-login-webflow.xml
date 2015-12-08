@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flow xmlns="http://www.springframework.org/schema/webflow"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.springframework.org/schema/webflow
+                          http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd">
+
+    <var name="credentials" class="org.jasig.cas.authentication.principal.UsernamePasswordCredentials" />
+    <!-- flow初始化 -->
+    <on-start>
+        <evaluate expression="initialFlowSetupAction" />
+    </on-start>
+    <!-- TGT登录，如果TGT和cookie用户信息同时存在，优先走TGT登录;即优先检测TGT是否存在-->
+	<decision-state id="ticketGrantingTicketExistsCheck">
+		<if test="flowScope.ticketGrantingTicketId neq null" then="hasServiceCheck" else="cookieUinfoExistsCheck" />
+	</decision-state>
+	<!-- cookies登录 -->
+	<decision-state id="cookieUinfoExistsCheck">
+	    <if test="flowScope.uinfo neq null" then="loginBycookieToRenewRequestCheck"
+			else="ssoCookieRemoveCheck" />
+	</decision-state>
+    <!-- 用户无登录操作，根据gateway判断返回应用页面，还是返回登录页 -->
+	<decision-state id="gatewayRequestCheck">
+		<if test="externalContext.requestParameterMap['gateway'] neq '' &amp;&amp; externalContext.requestParameterMap['gateway'] neq null &amp;&amp; flowScope.service neq null" then="gatewayServicesManagementCheck" else="generateLoginTicket" />
+	</decision-state>
+	
+	<!-- 检测是否存在app service 
+	<decision-state id="loginBycookieToServiceCheck">
+		<if test="flowScope.service != null" then="loginBycookieToRenewRequestCheck" else="loginInfoCreate" />
+	</decision-state>
+	-->
+	<!-- 检测是否存在强制登录标识renew,如果存在，强制跳回登录页面,此处没有删除用户的cookie信息；不存在，直接进入cookie自动登录 -->
+	<decision-state id="loginBycookieToRenewRequestCheck">
+		<if test="externalContext.requestParameterMap['renew'] neq '' &amp;&amp; externalContext.requestParameterMap['renew'] neq null" then="generateLoginTicket" else="loginInfoCreate" />
+	</decision-state>
+	
+	
+	<decision-state id="hasServiceCheck">
+		<if test="flowScope.service != null" then="renewRequestCheck" else="viewGenericLoginSuccess" />
+	</decision-state>
+	
+	<decision-state id="renewRequestCheck">
+		<if test="externalContext.requestParameterMap['renew'] neq '' &amp;&amp; externalContext.requestParameterMap['renew'] neq null" then="generateLoginTicket" else="generateServiceTicket" />
+	</decision-state>
+	
+	<!-- 
+	<action-state id="startAuthenticate">
+		<action bean="x509Check" />
+		<transition on="success" to="sendTicketGrantingTicket" />
+		<transition on="warn" to="warn" />
+		<transition on="error" to="generateLoginTicket" />
+	</action-state>
+	 -->
+	 <!-- 
+   	<decision-state id="isCookieLogin">
+		<if test="flowScope.uinfo != null" then="loginInfoCreate"
+			else="generateLoginTicket" />
+	</decision-state>
+	 -->
+	 <!-- 解密用户的cookie信息，并将信息保存到credentials对象中 -->
+	<action-state id="loginInfoCreate">
+		<evaluate expression="loginCredentialsCreate.doExecute(flowRequestContext)" />
+		<transition on="success" to="cookieLoginSubmit" />
+	</action-state>
+	
+	<action-state id="generateLoginTicket">
+        <evaluate expression="generateLoginTicketAction.generate(flowRequestContext)" />
+		<transition on="success" to="viewLoginForm" />
+	</action-state>
+    
+	<view-state id="viewLoginForm" view="gLoginView" model="credentials">
+        <binder>
+        	<binding property="isCookie" />
+            <binding property="username" />
+            <binding property="password" />
+        </binder>
+        <on-entry>
+            <set name="viewScope.commandName" value="'credentials'" />
+        </on-entry>
+		<transition on="submit" bind="true" validate="true" to="realSubmit">
+            <evaluate expression="authenticationViaFormAction.doBind(flowRequestContext, flowScope.credentials)" />
+        </transition>
+	</view-state>
+
+	<action-state id="realSubmit">
+        <evaluate expression="authenticationViaFormAction.submit(flowRequestContext, flowScope.credentials, messageContext)" />
+		<transition on="warn" to="warn" />
+		<transition on="success" to="sendTicketGrantingTicket" />
+		<transition on="error" to="generateLoginTicket" />
+	</action-state>
+	
+	<!-- 提交cookie认证信息 -->
+	<action-state id="cookieLoginSubmit">
+        <evaluate expression="authenticationViaFormAction.submit(flowRequestContext, flowScope.credentials, messageContext)" />
+		<transition on="warn" to="warn" />
+		<transition on="success" to="sendTicketGrantingTicket" />
+		<transition on="error" to="ssoCookieRemoveCheck" />
+	</action-state>
+	
+	<!-- cookie登录认证失败，删除cookie -->
+	<action-state id="ssoCookieRemoveCheck">
+	    <evaluate expression="ssoCookieRemoveAction" />
+	    <transition on="success" to="gatewayRequestCheck" />
+	</action-state>
+	<action-state id="sendTicketGrantingTicket">
+        <evaluate expression="sendTicketGrantingTicketAction" />
+		<transition to="serviceCheck" />
+	</action-state>
+
+	<decision-state id="serviceCheck">
+		<if test="flowScope.service neq null" then="generateServiceTicket" else="viewGenericLoginSuccess" />
+	</decision-state>
+	
+	<action-state id="generateServiceTicket">
+        <evaluate expression="generateServiceTicketAction" />
+		<transition on="success" to ="warn" />
+		<transition on="error" to="generateLoginTicket" />
+		<transition on="gateway" to="gatewayServicesManagementCheck" />
+	</action-state>
+
+    <action-state id="gatewayServicesManagementCheck">
+        <evaluate expression="gatewayServicesManagementCheck" />
+        <transition on="success" to="redirect" />
+    </action-state>
+
+    <action-state id="redirect">
+        <evaluate
+        expression="flowScope.service.getResponse(requestScope.serviceTicketId)"
+        result-type="org.jasig.cas.authentication.principal.Response"
+        result="requestScope.response" />
+        <transition to="postRedirectDecision" />
+    </action-state>
+
+    <decision-state id="postRedirectDecision">
+        <if test="requestScope.response.responseType.name() eq 'POST'" then="postView" else="redirectView" />
+    </decision-state>
+	
+	<!-- 
+		The "warn" action makes the determination of whether to redirect directly to the requested
+		service or display the "confirmation" page to go back to the server.
+	-->
+	<decision-state id="warn">
+		<if test="flowScope.warnCookieValue" then="showWarningView" else="redirect" />
+	</decision-state>
+	
+	<!-- 取得正常返回，及返回页面>
+	<action-state id="getReturnResponse">
+        <evaluate 
+        expression="generateResponse.getResponse(flowRequestContext)" 
+        result-type="org.jasig.cas.authentication.principal.Response" 
+        result="requestScope.response" />
+        <transition to="redirectView" />
+    </action-state-->
+
+	<!-- 
+		the "viewGenericLogin" is the end state for when a user attempts to login without coming directly from a service.
+		They have only initialized their single-sign on session.
+	-->
+	<end-state id="viewGenericLoginSuccess" view="casLoginGenericSuccessView" />
+
+	<!-- 
+		The "showWarningView" end state is the end state for when the user has requested privacy settings (to be "warned") to be turned on.  It delegates to a 
+		view defines in default_views.properties that display the "Please click here to go to the service." message.
+	-->
+	<end-state id="showWarningView" view="casLoginConfirmView" />
+
+    <end-state id="postView" view="postResponseView">
+        <on-entry>
+            <set name="requestScope.parameters" value="requestScope.response.attributes" />
+            <set name="requestScope.originalUrl" value="flowScope.service.id" />
+        </on-entry>
+    </end-state>
+
+	<!-- 
+		The "redirect" end state allows CAS to properly end the workflow while still redirecting
+		the user back to the service required.
+	-->
+	<end-state id="redirectView" view="externalRedirect:${requestScope.response.url}" />
+	
+	<end-state id="viewServiceErrorView" view="viewServiceErrorView" />
+    
+    <end-state id="viewServiceSsoErrorView" view="viewServiceSsoErrorView" />
+
+	<global-transitions>
+		<transition to="viewServiceErrorView" on-exception="org.springframework.webflow.execution.repository.NoSuchFlowExecutionException" />
+        <transition to="viewServiceSsoErrorView" on-exception="org.jasig.cas.services.UnauthorizedSsoServiceException" />
+		<transition to="viewServiceErrorView" on-exception="org.jasig.cas.services.UnauthorizedServiceException" />
+	</global-transitions>
+</flow>

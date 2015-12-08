@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="EucAppDao">
+	
+	<select id="queryById" parameterType="long" resultType="EucPartner">
+		<![CDATA[select id, app_Id as appId, partner_Id as partnerId, secert, app_type appType, name, domain, catalog, create_time createTime, update_time updateTime, client, os, intro from euc_app where id=#{va}]]>
+	</select>
+	
+	<select id="queryByAppId" parameterType="long" resultType="EucPartner">
+		<![CDATA[select id, app_Id as appId, partner_Id as partnerId, secert, app_type appType, name, domain, catalog, create_time createTime, update_time updateTime, client, os, intro from euc_app where app_Id=#{va}]]>
+	</select>
+	
+	<select id="queryByPartnerId" parameterType="long" resultType="EucPartner">
+		<![CDATA[select id, app_Id as appId, partner_Id as partnerId, secert, app_type appType, name, domain, catalog, create_time createTime, update_time updateTime, client, os, intro from euc_app where partner_Id=#{va}]]>
+	</select>
+	
+</mapper>

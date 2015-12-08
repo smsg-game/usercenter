@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:webflow="http://www.springframework.org/schema/webflow-config"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+      http://www.springframework.org/schema/context
+      http://www.springframework.org/schema/context/spring-context.xsd
+      http://www.springframework.org/schema/mvc
+      http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+      http://www.springframework.org/schema/webflow-config
+      http://www.springframework.org/schema/webflow-config/spring-webflow-config-2.0.xsd">
+    
+    <import resource="spring-configuration/propertyFileConfigurer.xml" />
+	
+	<!--bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter" /-->
+    <!--bean class="org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter" /-->
+    
+    <bean
+		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<bean
+					class="org.springframework.http.converter.StringHttpMessageConverter">
+					<property name="supportedMediaTypes">
+						<list>
+							<value>text/plain;charset=UTF-8</value>
+						</list>
+					</property>
+				</bean>
+			</list>
+		</property>
+	</bean>
+        
+    <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
+		<property name="order" value="0" />
+		<property name="interceptors">    
+            <list>    
+                <ref bean="permissionsInterceptor"/>    
+            </list>    
+        </property>  
+	</bean>
+	
+	<bean id="permissionsInterceptor" class="com.easou.usercenter.interceptor.PermissionsInterceptorAdapter">
+	</bean>
+
+	<context:component-scan base-package="com.easou.usercenter.game.web" />
+
+	<mvc:resources mapping="/images/**" location="/images/"
+		cache-period="31556926" />
+	<mvc:resources mapping="/js/**" location="/js/"
+		cache-period="31556926" />
+	<mvc:resources mapping="/css/**" location="/css/"
+		cache-period="31556926" />
+	<mvc:resources mapping="/themes/**" location="/themes/"
+		cache-period="31556926" />
+	
+	<!-- Enable annotation-based validation using Bean Validation Framework -->  
+    <!-- Using these instead of vld namespace to prevent Eclipse from complaining -->  
+    <bean id="configurationLoader"  
+        class="org.springmodules.validation.bean.conf.loader.annotation.AnnotationBeanValidationConfigurationLoader"/>  
+    <bean id="validator" class="org.springmodules.validation.bean.BeanValidator"  
+        p:configurationLoader-ref="configurationLoader"/>
+		
+	<bean id="exceptionResolver"
+		class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="warnLogCategory">
+			<value>org.springframework.web.servlet.handler.SimpleMappingExceptionResolver
+			</value>
+		</property>
+	</bean>
+	
+		<!-- View Resolver -->
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.ResourceBundleViewResolver"
+		p:order="0">
+		<property name="basenames">
+			<list>
+				<value>${cas.viewResolver.basename}</value>
+				<value>game_touch_views</value>
+				<value>protocol_views</value>
+			</list>
+		</property>
+	</bean>
+		
+	<bean id="urlBasedViewResolver"
+		class="org.springframework.web.servlet.view.UrlBasedViewResolver"
+		p:viewClass="org.springframework.web.servlet.view.JstlView"
+		p:prefix="/view/jsp/" p:suffix=".jsp" p:order="1" />
+	
+</beans>

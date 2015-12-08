@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="OuserDao">
+	<sql id="columns"> u.id id,u.ea_id,u.third_id,u.net_id,u.status,u.nick_name</sql>
+	
+	<select id="queryOUserByeidAndOtype" parameterType="map" resultType="OUser">
+		select
+		<include refid="columns" />
+		from euc_binding u 
+	   <![CDATA[where u.ea_id=#{easou_id} and u.net_id=#{type} and rownum<2]]>
+	</select>
+	
+	<select id="queryOUserByExtIdAndOType" parameterType="map" resultType="OUser">
+		select
+		<include refid="columns" />
+		from euc_binding u 
+	   <![CDATA[where u.third_id=#{third_id} and u.net_id=#{type} and rownum<2]]>
+	</select>
+	
+	<insert id="insertOuserInfo" parameterType="OUser">
+		insert into euc_binding(id,ea_id,third_id,net_id,ext_id,nick_name)
+		values(SEQ_euc_binding.Nextval,#{ea_id},#{third_id},#{net_id},0,#{nick_name})
+	</insert>
+	
+	<delete id="deleteOuserInfo" parameterType="long">
+		delete from euc_binding where id=#{value}
+	</delete>
+   
+   	<select id="queryOUserByEaId" parameterType="string" resultType="OUser">
+   		select <include refid="columns" /> from euc_binding u
+   		where ea_id=#{value}
+   	</select>
+</mapper>
